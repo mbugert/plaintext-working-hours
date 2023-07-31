@@ -1,0 +1,50 @@
+%import common.NEWLINE
+%import common.DIGIT
+
+
+start : (workday | description_day)*
+workday : primary_line secondary_line*
+primary_line : DATE WHITESPACE time_delta (WHITESPACE description)? NEWLINE
+secondary_line : WHITESPACE? signed_time_delta (WHITESPACE description)? NEWLINE
+description : /[^\n]/+
+signed_time_delta : (SIGN WHITESPACE?)? time_delta
+time_delta: DURATION | time_interval
+time_interval : TIME WHITESPACE? "-" WHITESPACE? TIME
+description_day : DATE WHITESPACE description NEWLINE
+
+
+// DATE and TIME adapted from https://github.com/lark-parser/lark/pull/800
+YEAR  : DIGIT DIGIT DIGIT DIGIT
+MONTH : "0" "1".."9"
+      | "1" "1".."2" 
+DAY   : "0" DIGIT
+      | "1" DIGIT 
+      | "2" DIGIT
+      | "3" "0".."1"
+      
+ISO_DATE : YEAR "-" MONTH "-" DAY
+DE_DE_DATE : DAY "." MONTH "." YEAR
+EN_US_DATE : MONTH "/" DAY "/" YEAR
+
+DATE : ISO_DATE 
+     | DE_DE_DATE 
+     | EN_US_DATE
+
+HOUR         : "0".."1" DIGIT
+             | "2" "0".."4"
+MINUTE       : "0".."5" DIGIT
+SECOND       : "0".."5" DIGIT 
+             | "60" // leap second
+
+TIME : HOUR ":" MINUTE (":" SECOND)?
+
+DURATION : DIGIT+ UNIT?
+UNIT : "min" | "minute" "s"? | "h" | "hour" "s"?
+MINUS : "-" | "minus"
+PLUS : "+" | "plus"
+SIGN : PLUS | MINUS
+
+WHITESPACE: (" " | /\t/ )+
+COMMENT: /#.*\n/
+%ignore COMMENT
+
