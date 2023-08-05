@@ -156,6 +156,8 @@ def parse(path: pathlib.Path) -> pd.DataFrame:
 
     tree = lark.parse(times)
     df = WorkingHoursTransformer().transform(tree)
+    # ensure all columns are present
+    df = df.reindex(columns=[DATE, SECONDS, DESCRIPTION])
     return df
 
 
